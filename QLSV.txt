@@ -1,0 +1,200 @@
+QLSV form 1
+using QLSV;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Data.SqlClient;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+
+namespace QLSV
+{
+    public partial class Form1 : Form
+    {
+        public Form1()
+        {
+            InitializeComponent();
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            Ketnoi kn = new Ketnoi();
+            DataSet ds = kn.layDL();
+            dtgv.DataSource = ds.Tables[0];
+        }
+        private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+
+        }
+
+        private void dataGridView1_CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+            txtMaSV.Text = dtgv.Rows[e.RowIndex].Cells[0].Value.ToString();
+            txtHoTen.Text = dtgv.Rows[e.RowIndex].Cells[1].Value.ToString();
+            dTNgaysinh.Value = Convert.ToDateTime(dtgv.Rows[e.RowIndex].Cells[2].Value);
+            if (dtgv.Rows[e.RowIndex].Cells[3].Value.ToString() == "Nam")
+            {
+                rdNam.Checked = true;
+            }
+            else
+            {
+                rdNu.Checked = true;
+            }
+            cbNoisinh.Text = dtgv.Rows[e.RowIndex].Cells[4].Value.ToString();
+        }
+
+        private void btnThem_Click(object sender, EventArgs e)
+        {
+            Ketnoi kn = new Ketnoi();
+            string gioiTinh = rdNam.Checked ? "Nam" : "Nữ";
+            int row = kn.Chucnang("insert into tbSV values ("+txtMaSV.Text+",N'"+txtHoTen.Text+"','"+dTNgaysinh.Text + "',N'"+gioiTinh+"',N'"+cbNoisinh.Text +"')");
+            if (row > 0)
+            {
+                MessageBox.Show("Thành công");
+                DataSet ds = kn.layDL();
+                dtgv.DataSource = ds.Tables[0];
+            }
+            else
+            {
+                MessageBox.Show("Thất bại");
+            }
+        }
+
+        private void btnSua_Click(object sender, EventArgs e)
+        {
+            Ketnoi kn = new Ketnoi();
+            string gioiTinh = rdNam.Checked ? "Nam" : "Nữ";
+            int row = kn.Chucnang("update tbSV set HoTen = N'"+txtHoTen.Text +"', NgaySinh = '"+dTNgaysinh.Text +"' , GioiTinh = N'"+gioiTinh+"', NoiSinh = N'"+cbNoisinh.Text +"' where MaSV = "+txtMaSV.Text +"");
+            if (row > 0)
+            {
+                MessageBox.Show("Thành công");
+                DataSet ds = kn.layDL();
+                dtgv.DataSource = ds.Tables[0];
+            }
+            else
+            {
+                MessageBox.Show("Thất bại");
+            }
+        }
+
+        private void btnXoa_Click(object sender, EventArgs e)
+        {
+            Ketnoi kn = new Ketnoi();
+            int row = kn.Chucnang("delete from tbSV where MaSV = "+txtMaSV.Text+"");
+            if (row > 0)
+            {
+                MessageBox.Show("Thành công");
+                DataSet ds = kn.layDL();
+                dtgv.DataSource = ds.Tables[0];
+            }
+            else
+            {
+                MessageBox.Show("Thất bại");
+            }
+        }
+
+
+        private void btnLoc_Click(object sender, EventArgs e)
+        {
+            this.Hide(); // Ẩn Form1
+            Form2 f2 = new Form2();
+            f2.ShowDialog();
+            this.Show(); // Hiện lại sau khi Form2 đóng
+        }
+
+        private void txtMaSV_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void txtHoTen_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label2_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label1_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label3_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void dTNgaysinh_ValueChanged(object sender, EventArgs e)
+        {
+
+        }
+    }
+}
+form Ketnoi 
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Data.SqlClient;
+using System.Data;
+namespace QLSV
+{
+    internal class Ketnoi
+    {
+        public Ketnoi()
+        {
+            // Constructor logic can be added here if needed
+        }
+        public DataSet layDL()
+        {
+            string connection = "Data Source=MSI;Initial Catalog=QLSV_C;Integrated Security=True;";
+            DataSet ds = new DataSet();
+            SqlDataAdapter da;
+            try
+            {
+                SqlConnection connec = new SqlConnection(connection);
+                connec.Open();
+                da = new SqlDataAdapter("Select MaSV as 'Mã SV', HoTen as 'Họ tên' , NgaySinh as 'Ngày sinh' ,GioiTinh as 'Giới tính', NoiSinh as 'Nơi sinh' from tbSV ", connection);
+                da.Fill(ds);
+                return ds;
+                connec.Close();
+            }
+            catch (Exception)
+            {
+                return null;
+                throw;
+            }
+        }
+        public int Chucnang(string sql)
+        {
+            string connection = "Data Source=MSI;Initial Catalog=QLSV_C;Integrated Security=True;";
+            DataSet ds = new DataSet();
+            SqlDataAdapter da;
+            SqlCommand cmd;
+            try
+            {
+                SqlConnection connec = new SqlConnection(connection);
+                connec.Open();
+                cmd = new SqlCommand(sql, connec);
+                int row = cmd.ExecuteNonQuery();
+                return row;
+                connec.Close();
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+    }
+
+}
+
